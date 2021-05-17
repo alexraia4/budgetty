@@ -1,3 +1,6 @@
+import axios from 'axios';
+
+
 let initialState = {
     email: null,
     firstname: null,

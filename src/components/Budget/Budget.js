@@ -1,3 +1,4 @@
+
 import React, { Component } from 'react';
 import Background from './../shared/Background/Background'
 import Chart1 from './../shared/Chart1';
@@ -8,26 +9,33 @@ import Loading from './../shared/Loading/Loading';
 import Nav from './../shared/Nav';
 import './Budget.css';
 import { connect } from 'react-redux'
+import { requestUserData } from './../../ducks/userReducer'
+//IMPORT THE addPurchase AND removePurchase ACTION CREATORS
+import { requestBudgetData, addPurchase, removePurchase } from './../../ducks/budgetReducer'
 
 
 class Budget extends Component {
+  componentDidMount() {
+    this.props.requestUserData();
+    this.props.requestBudgetData();
+  }
 
   render() {
-  // DESTRUCTURE THE LOADING PROPERTY FROM THE BUDGET OBJECT THAT WAS MAPPED TO PROPS THROUGH MAPSTATETOPROPS/CONNECT
-    const { loading } = this.props.budget;
+    const { loading, purchases, budgetLimit } = this.props.budget;
+    const { firstName, lastName } = this.props.user;
     return (
       <Background>
         {loading ? <Loading /> : null}
         <div className='budget-container'>
-          <Nav />
+          <Nav firstName={firstName} lastName={lastName} />
           <div className='content-container'>
             <div className="purchases-container">
-              <AddPurchase />
-              <DisplayPurchases />
+              <AddPurchase addPurchase={this.props.addPurchase} />
+              <DisplayPurchases purchases={purchases} removePurchase={this.props.removePurchase} />
             </div>
             <div className='chart-container'>
-              <Chart1 />
-              <Chart2 />
+              <Chart1 purchases={purchases} budgetLimit={budgetLimit} />
+              <Chart2 purchases={purchases} />
             </div>
           </div>
         </div>
@@ -36,15 +44,14 @@ class Budget extends Component {
   }
 }
 
-// THIS FUNCTION TAKES IN THE REDUX STORE STATE AND MAPS THE BUDGET REDUCER INFO 
-// FROM THE REDUX STORE TO A BUDGET KEY ON THIS COMPONENT'S PROPS OBJECT
 function mapStateToProps(state) {
   return {
-    budget: state.budget
+    budget: state.budget,
+    user: state.user
   }
 }
 
 	
-// THE CONNECT METHOD TAKES IN THE MAPSTATETOPROPS FUNCTION AND CONNECTS THIS COMPONENT TO THE REDUX STORE
-export default connect(mapStateToProps)(Budget);
+// ADD addPurchase AND removePurchase TO THE 2ND OBJ ARG IN THE CONNECT METHOD
+export default connect(mapStateToProps, { requestUserData, requestBudgetData, addPurchase, removePurchase })(Budget);
 
